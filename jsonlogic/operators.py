@@ -1,5 +1,5 @@
 from decimal import Decimal
-from enum import Enum, auto
+from typing import Literal
 
 from .json import JSON, Null, Boolean, Integer, Float, String, Array, Object
 from .jsonlogic import evaluate, operator
@@ -36,14 +36,11 @@ def as_number(arg: String) -> Integer | Float:
 
     raise ValueError(f"{arg.path}: Cannot convert String value to Number")
 
-class Cmp(Enum):
-    Less = auto()
-    Equal = auto()
-    Greater = auto()
+type Cmp = Literal['lt', 'eq', 'gt']
 
 def cmp(left: JSON, right: JSON) -> Cmp | None:
     match left, right:
-        case Null(), Null(): return Cmp.Equal
+        case Null(), Null(): return 'eq'
 
         case Null(), _:
             return cmp(Integer(0), right)
@@ -52,11 +49,13 @@ def cmp(left: JSON, right: JSON) -> Cmp | None:
 
         case (Boolean() | Integer() | Float()), (Boolean() | Integer() | Float()):
             if left == right:
-                return Cmp.Equal
+                return 'eq'
             elif left < right:
-                return Cmp.Less
+                return 'lt'
+            elif left > right:
+                return 'gt'
             else:
-                return Cmp.Greater
+                return None
         
         case (Boolean() | Integer() | Float()), String():
             return cmp(left, as_number(right))
@@ -65,19 +64,23 @@ def cmp(left: JSON, right: JSON) -> Cmp | None:
         
         case String(), String():
             if left == right:
-                return Cmp.Equal
+                return 'eq'
             elif left < right:
-                return Cmp.Less
+                return 'lt'
+            elif left > right:
+                return 'gt'
             else:
-                return Cmp.Greater
+                return None
         
         case Array(), Array():
             if left == right:
-                return Cmp.Equal
+                return 'eq'
             elif left < right:
-                return Cmp.Less
+                return 'lt'
+            elif left > right:
+                return 'gt'
             else:
-                return Cmp.Greater
+                return None
         
         case _, _:
             return None
@@ -190,7 +193,7 @@ def op_if(arg: JSON, data: JSON) -> JSON:
 def op_eq(arg: JSON, data: JSON) -> Boolean:
     match arg:
         case Array([left, right]):
-            return Boolean(cmp(left, right) is Cmp.Equal)
+            return Boolean(cmp(left, right) == 'eq')
         case Array(_):
             raise wrong_arity(arg, "two")
         case _:
@@ -210,7 +213,7 @@ def op_eq_eq(arg: JSON, data: JSON) -> Boolean:
 def op_neq(arg: JSON, data: JSON) -> Boolean:
     match arg:
         case Array([left, right]):
-            return Boolean(cmp(left, right) is not Cmp.Equal)
+            return Boolean(cmp(left, right) != 'eq')
         case Array(_):
             raise wrong_arity(arg, "two")
         case _:
@@ -274,7 +277,7 @@ def op_and(arg: JSON, data: JSON) -> JSON:
 def op_lt(arg: JSON, data: JSON) -> Boolean:
     match arg:
         case Array([left, right]):
-            return Boolean(cmp(left, right) is Cmp.Less)
+            return Boolean(cmp(left, right) == 'lt')
         case Array([left, middle, right]):
             return Boolean(op_lt(Array([left, middle]), data) and op_lt(Array([middle, right]), data))
         case Array(_):
@@ -286,7 +289,7 @@ def op_lt(arg: JSON, data: JSON) -> Boolean:
 def op_lte(arg: JSON, data: JSON) -> Boolean:
     match arg:
         case Array([left, right]):
-            return Boolean(cmp(left, right) in (Cmp.Less, Cmp.Equal))
+            return Boolean(cmp(left, right) in ('lt', 'eq'))
         case Array([left, middle, right]):
             return Boolean(op_lte(Array([left, middle]), data) and op_lte(Array([middle, right]), data))
         case Array(_):
@@ -298,7 +301,7 @@ def op_lte(arg: JSON, data: JSON) -> Boolean:
 def op_gt(arg: JSON, data: JSON) -> Boolean:
     match arg:
         case Array([left, right]):
-            return Boolean(cmp(left, right) is Cmp.Greater)
+            return Boolean(cmp(left, right) == 'gt')
         case Array([left, middle, right]):
             return Boolean(op_gt(Array([left, middle]), data) and op_gt(Array([middle, right]), data))
         case Array(_):
@@ -310,7 +313,7 @@ def op_gt(arg: JSON, data: JSON) -> Boolean:
 def op_gte(arg: JSON, data: JSON) -> Boolean:
     match arg:
         case Array([left, right]):
-            return Boolean(cmp(left, right) in (Cmp.Greater, Cmp.Equal))
+            return Boolean(cmp(left, right) in ('gt', 'eq'))
         case Array([left, middle, right]):
             return Boolean(op_gte(Array([left, middle]), data) and op_gte(Array([middle, right]), data))
         case Array(_):
