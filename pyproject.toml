@@ -1,0 +1,19 @@
+[project]
+name = "jsonlogic"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.400",
+    "pytest>=8.3.5",
+    "requests>=2.32.3",
+    "ruff>=0.11.8",
+]
+
+[tool.pyright]
+typeCheckingMode = "basic"  # "strict" gives too many false positive for library code
+
