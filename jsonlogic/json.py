@@ -19,7 +19,7 @@ class JSON:
     @overload
     def __new__(cls, value: int, path: JSONPath = JSONPath.empty()) -> 'Integer': ...
     @overload
-    def __new__(cls, value: Decimal, path: JSONPath = JSONPath.empty()) -> 'Float': ...
+    def __new__(cls, value: float | Decimal, path: JSONPath = JSONPath.empty()) -> 'Float': ...
     @overload
     def __new__(cls, value: str, path: JSONPath = JSONPath.empty()) -> 'String': ...
     @overload
@@ -32,22 +32,22 @@ class JSON:
     def __new__(cls, value: object, path: JSONPath = JSONPath.empty()) -> 'JSON': ...
     def __new__(cls, value: object = None, path: JSONPath = JSONPath.empty()) -> 'JSON':
         match value:
-            case None | Null():
+            case Null():
                 return Null.__new__(Null, None, path)
-            case True | False | Boolean():
+            case JSON():
+                return type(value).__new__(type(value), value, path)
+            case None:
+                return Null.__new__(Null, None, path)
+            case True | False:
                 return Boolean.__new__(Boolean, value, path)
-            case int() | Integer():
+            case int():
                 return Integer.__new__(Integer, value, path)
-            case Decimal() | Float():
+            case float() | Decimal():
                 return Float.__new__(Float, value, path)
-            case str() | String():
+            case str():
                 return String.__new__(String, value, path)
-            case Object():
-                return Object.__new__(Object, value, path)
             case _ if isinstance(value, Mapping):
                 return Object.__new__(Object, value, path)
-            case Array():
-                return Array.__new__(Array, value, path)
             case _ if isinstance(value, Sequence):
                 return Array.__new__(Array, value, path)
             case _:
@@ -99,7 +99,7 @@ class Integer(int, JSON):
 
 @final
 class Float(Decimal, JSON):
-    def __new__(cls, value: Decimal, path: JSONPath = JSONPath.empty()) -> Self:
+    def __new__(cls, value: float | Decimal, path: JSONPath = JSONPath.empty()) -> Self:
         return Decimal.__new__(cls, value)
 
 @final

@@ -54,7 +54,7 @@ class JSONTestItem(pytest.Item):
         self.logic, self.data, self.expected = test
 
     def runtest(self):
-        self.actual = evaluate(JSON(self.logic), JSON(self.data))
+        self.actual = evaluate(self.logic, self.data)
         assert self.expected == self.actual
     
     def repr_failure(self, excinfo: pytest.ExceptionInfo[BaseException], *args: object, **kwargs: object):
