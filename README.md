@@ -33,7 +33,7 @@ Traceback (most recent call last):
 IndexError: string index out of range
 ```
 
-The canonical Javascript JSONLogic implementation, hosted at [JSONLogic.com](JSONLogic.com), doesn't even alert the user that the logic is ill-formed:
+The canonical Javascript JSONLogic implementation, hosted at [JSONLogic.com](https://JSONLogic.com), doesn't even alert the user that the logic is ill-formed:
 
 ```
 >>> jsonLogic.apply({"var": 3.5}, ["a", "b", "c", "d", "e"])
