@@ -7,7 +7,7 @@ The goal of this JSONLogic implementation is two-fold:
 1. For well-formed input: to produce correct output
 2. For erroneous input: to produce error messages which are useful in debugging the input.
 
-Most JSONLogic implementations accomplish the first goal, but don't even attempt to meet the second goal.
+Many JSONLogic implementations accomplish the first goal, but don't even attempt to meet the second goal.
 
 For example, the [json-logic](https://github.com/nadirizr/json-logic-py) Python library produces error messages like the following:
 
@@ -33,14 +33,16 @@ Traceback (most recent call last):
 IndexError: string index out of range
 ```
 
-The canonical Javascript JSONLogic implementation, hosted at [JSONLogic.com](https://JSONLogic.com), doesn't even alert the user that the logic is ill-formed:
+(Although in point of fact, that library doesn't even produce correct output in all cases; it fails to implement several operators, such as "map", "filter", and "reduce".)
+
+The canonical Javascript [JSONLogic implementation](JSONLogic.com), on the other hand, doesn't even alert the user if it encounters ill-formed logic:
 
 ```
 >>> jsonLogic.apply({"var": 3.5}, ["a", "b", "c", "d", "e"])
 null
 ```
 
-On the other hand, this library's implementation returns an error message indicating the precise location of the error (as an RFC-9535 JSONPath), and a useful description:
+In contrast, this library's implementation returns an error message indicating the precise location of the error (as an RFC-9535 JSONPath), and a useful description:
 
 ```
 >>> evaluate({"var": 3.5}, ["a", "b", "c", "d", "e"])
